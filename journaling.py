@@ -29,14 +29,16 @@ def generate_op_record_key(oplog_record):
 
 class CouchbaseOpLog(OpLog):
     def __init__(self, **kwargs):
-        self.couchbase_server = CouchbaseServer('localhost')
-        self.pmgr = CouchbasePersistenceManager(self.couchbase_server, 'default')
+        couchbase_host = kwargs.get('hostname', 'localhost')
+        bucket_name = kwargs.get('bucket', 'default')
+        self.couchbase_server = CouchbaseServer(couchbase_host)
+        self.pmgr = CouchbasePersistenceManager(self.couchbase_server, bucket_name)
         self.pmgr.register_keygen_function('op_record', generate_op_record_key)
 
 
     def log_start(self, **kwargs):
         op_record = CouchbaseRecordBuilder('op_record').add_fields(kwargs).build()
-        self.pmgr.insert_record(op_record)
+        return self.pmgr.insert_record(op_record)
 
 
     def log_end(self, **kwargs):

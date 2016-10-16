@@ -5,11 +5,23 @@ from journaling import journal, CouchbaseOpLog
 
 
       
-oplog = CouchbaseOpLog(host='localhost', bucket='default')
+oplog = CouchbaseOpLog(hostname='localhost', bucket='default')
 
-@journal('dummy_op', oplog)
-def do_something():
-    print '### This is an operation.'
+@journal('decorator_test_op', oplog)
+def test_decorator_mode():
+    print '### This is a journaled operation.'
 
 
-do_something()
+def test_context_manager_mode():
+    with journal('context_mgr_test_op', oplog) as j:
+        print '### This is also a journaled operation.'
+
+
+        
+def main():
+    test_decorator_mode()
+    test_context_manager_mode()
+
+
+if __name__ == '__main__':
+    main()
