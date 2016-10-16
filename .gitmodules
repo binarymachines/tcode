@@ -1,3 +1,4 @@
 [submodule "snap"]
 	path = snap
 	url = git@github.com:binarymachines/snap.git
+	branch = master
