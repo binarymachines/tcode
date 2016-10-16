@@ -4,7 +4,7 @@
 from functools import wraps
 import os
 import datetime
-
+from couchbasedbx import *
 
 
 
@@ -21,10 +21,17 @@ class OpLog(object):
         pass
     
 
+
+def generate_op_record_key(oplog_record):
+    return '%s_%s' % (oplog_record.record_type, datetime.datetime.utcnow().isoformat()) 
+
+
+
 class CouchbaseOpLog(OpLog):
     def __init__(self, **kwargs):
         self.couchbase_server = CouchbaseServer('localhost')
-        self.pmgr = CouchbasePersistenceManager(couchbase_server, 'default')
+        self.pmgr = CouchbasePersistenceManager(self.couchbase_server, 'default')
+        self.pmgr.register_keygen_function('op_record', generate_op_record_key)
 
 
     def log_start(self, **kwargs):
@@ -69,7 +76,7 @@ class journal(ContextDecorator):
 
     def __enter__(self):
         print 'writing oplog START record...'
-        record = dict(timestamp=datetime.datetime.now(),
+        record = dict(timestamp=datetime.datetime.now().isoformat(),
                       phase='start',
                       pid=os.getpid(),
                       op_name=self.op_name)
@@ -80,9 +87,10 @@ class journal(ContextDecorator):
 
     def __exit__(self, typ, val, traceback):
         print 'writing oplog END record:...'
-        record = dict(timestamp=datetime.datetime.now(),
+        record = dict(timestamp=datetime.datetime.now().isoformat(),
                       phase='end',
-                      pid=os.getpid())
+                      pid=os.getpid(),
+                      op_name=self.op_name)
         
         self.op_log.log_end(**record)
         return self
