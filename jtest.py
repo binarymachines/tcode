@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
 
-from journaling import journaling
+from journaling import journal
 
 
+      
+oplog = CouchbaseOpLog(host='localhost', bucket='default')
 
-@journaling('foobar')
+@journal(oplog)
 def do_something():
     print '### This is an operation.'
 
