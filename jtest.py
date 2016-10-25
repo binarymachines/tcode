@@ -16,12 +16,13 @@ def test_context_manager_mode():
     with journal('context_mgr_test_op', oplog) as j:
         print '### This is also a journaled operation.'
 
-
+        
         
 def main():
     test_decorator_mode()
     test_context_manager_mode()
 
-
+    test_load_record()
+    
 if __name__ == '__main__':
     main()
